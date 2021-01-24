@@ -10,7 +10,7 @@
   <section class="section">
     <div id="vue-root" class="container">
       <h1 class="title">FLDR by speedyblur - Targeting {{ getHost() }} (frozen) - {{ getAggregate() }} active connections</h1>
-      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span></p>
+      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - Sent {{ getSentMbytes() }} MBytes</p>
       <form class="block" @submit.prevent="updateConfig">
         <div class="field">
           <label class="label">Config</label>
@@ -77,6 +77,18 @@
             }
           }
           return coll;
+        },
+        getSentMbytes() {
+          let coll = 0;
+          for (const k in this.reports) {
+            if (Object.hasOwnProperty.call(this.reports, k)) {
+              const el = this.reports[k];
+              for (let i = 0; i < el.length; i++) {
+                coll += el[i].Sent;
+              }
+            }
+          }
+          return Math.round(coll / 1024 / 1024 * 100) / 100;
         },
         getHost() {
           return JSON.parse(this.config).host;
