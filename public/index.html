@@ -83,7 +83,7 @@
         },
         checkUp() {
           axios.get('/check').then((resp) => {
-            this.isUp = resp.body === 'true';
+            this.isUp = resp.data;
             setTimeout(() => {
               this.checkUp();
             }, 2000);
