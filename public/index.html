@@ -69,7 +69,9 @@
           for (const k in this.reports) {
             if (Object.hasOwnProperty.call(this.reports, k)) {
               const el = this.reports[k];
-              coll += parseInt(el.Act, 10);
+              for (let i = 0; i < el.length; i++) {
+                coll += el[i].Act;
+              }
             }
           }
           return coll;
