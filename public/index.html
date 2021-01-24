@@ -10,6 +10,7 @@
   <section class="section">
     <div id="vue-root" class="container">
       <h1 class="title">FLDR by speedyblur - Targeting {{ getHost() }} (frozen) - {{ getAggregate() }} active connections</h1>
+      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span></p>
       <form class="block" @submit.prevent="updateConfig">
         <div class="field">
           <label class="label">Config</label>
@@ -57,6 +58,7 @@
       data: {
         reports: {},
         config: "",
+        isUp: false,
       },
       methods: {
         updateConfig() {
@@ -87,6 +89,13 @@
         setInterval(() => {
           axios.get('/xhr').then((resp) => {
             this.reports = resp.data;
+          });
+        }, 1000);
+        setInterval(() => {
+          axios.get('//' + this.getHost()).then(() => {
+            this.isUp = true;
+          }).catch(() => {
+            this.isUp = false;
           });
         }, 1000);
       }
