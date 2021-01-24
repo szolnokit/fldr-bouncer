@@ -57,7 +57,7 @@
       el: '#vue-root',
       data: {
         reports: {},
-        config: "",
+        config: "{}",
         isUp: false,
       },
       methods: {
@@ -80,6 +80,15 @@
         },
         getHost() {
           return JSON.parse(this.config).host;
+        },
+        checkUp() {
+          axios.get('//' + this.getHost()).then(() => {
+            this.isUp = true;
+          }).catch(() => {
+            this.isUp = false;
+          }).finally(() => {
+            this.checkUp();
+          });
         }
       },
       mounted() {
@@ -91,13 +100,7 @@
             this.reports = resp.data;
           });
         }, 1000);
-        setInterval(() => {
-          axios.get('//' + this.getHost()).then(() => {
-            this.isUp = true;
-          }).catch(() => {
-            this.isUp = false;
-          });
-        }, 1000);
+        this.checkUp();
       }
     });
   </script>
