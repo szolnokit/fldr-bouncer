@@ -9,7 +9,7 @@
 <body>
   <section class="section">
     <div id="vue-root" class="container">
-      <h1 class="title">Dashboard</h1>
+      <h1 class="title">Dashboard - {{ getAggregate() }} active connections/h1>
       <form class="block" @submit.prevent="updateConfig">
         <div class="field">
           <label class="label">Config</label>
@@ -63,6 +63,16 @@
           axios.post('/config', JSON.parse(this.config)).then((resp) => {
             alert("ok!");
           });
+        },
+        getAggregate() {
+          let coll = 0;
+          for (const k in this.reports) {
+            if (Object.hasOwnProperty.call(this.reports, k)) {
+              const el = this.reports[k];
+              coll += el.Act;
+            }
+          }
+          return coll;
         }
       },
       mounted() {
