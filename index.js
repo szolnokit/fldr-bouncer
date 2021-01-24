@@ -1,4 +1,5 @@
 const express = require('express');
+const got = require('got');
 const level = require('level');
 
 const db = level('db');
@@ -18,6 +19,16 @@ app.get('/config', async (_, res) => {
 app.post('/config', async (req, res) => {
   await db.put('config', JSON.stringify(req.body));
   res.sendStatus(200);
+});
+
+app.get('/check', async (req, res) => {
+  const conf = JSON.parse(await db.get('config'));
+  try {
+    await got(`http${conf.doTLS ? 's' : ''}://${conf.host}:${conf.port}`);
+    res.send('true');
+  } catch (e) {
+    res.send('false');
+  }
 });
 
 app.post('/update/:id', async (req, res) => {

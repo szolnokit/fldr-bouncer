@@ -82,12 +82,11 @@
           return JSON.parse(this.config).host;
         },
         checkUp() {
-          axios.get('//' + this.getHost()).then(() => {
-            this.isUp = true;
-          }).catch(() => {
-            this.isUp = false;
-          }).finally(() => {
-            this.checkUp();
+          axios.get('/check').then((resp) => {
+            this.isUp = resp.body === 'true';
+            setTimeout(() => {
+              this.checkUp();
+            }, 2000);
           });
         }
       },
