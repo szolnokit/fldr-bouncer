@@ -9,7 +9,7 @@
 <body>
   <section class="section">
     <div id="vue-root" class="container">
-      <h1 class="title">FLDR by speedyblur - Targeting {{ getHost() }} (frozen) - {{ getAggregate() }} active connections</h1>
+      <h1 class="title">FLDR targeting {{ getHost() }} with {{ getAggregate() }} active connections</h1>
       <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - Sent {{ getSentMbytes() }} MBytes</p>
       <form class="block" @submit.prevent="updateConfig">
         <div class="field">
