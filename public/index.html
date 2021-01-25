@@ -113,7 +113,7 @@
             const oldMbytes = this.getSentMbytes();
             this.reports = resp.data;
             if (this.lastReport != null) {
-              this.speedMbytes = (this.getSentMbytes() - oldMbytes) / ((new Date().getTime() - this.lastReport)/1000);
+              this.speedMbytes = Math.round((this.getSentMbytes() - oldMbytes) / ((new Date().getTime() - this.lastReport)/1000) * 100) / 100;
             }
             this.lastReport = new Date().getTime();
           });
