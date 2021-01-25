@@ -10,7 +10,7 @@
   <section class="section">
     <div id="vue-root" class="container">
       <h1 class="title">FLDR targeting {{ getHost() }} with {{ getAggregate() }} active connections</h1>
-      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - Sent {{ getSentMbytes() }} MBytes</p>
+      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
       <form class="block" @submit.prevent="updateConfig">
         <div class="field">
           <label class="label">Config</label>
@@ -59,6 +59,8 @@
         reports: {},
         config: "{}",
         isUp: false,
+        lastReport: null,
+        speedMbytes: 0,
       },
       methods: {
         updateConfig() {
@@ -108,7 +110,12 @@
         });
         setInterval(() => {
           axios.get('/xhr').then((resp) => {
+            const oldMbytes = this.getSentMbytes();
             this.reports = resp.data;
+            if (this.lastReport != null) {
+              this.speedMbytes = (this.getSentMbytes() - oldMbytes) / ((new Date().getTime() - this.lastReport)/1000);
+            }
+            this.lastReport = new Date().getTime();
           });
         }, 1000);
         this.checkUp();
