@@ -9,18 +9,105 @@
 <body>
   <section class="section">
     <div id="vue-root" class="container">
-      <h1 class="title">FLDR targeting {{ getHost() }} with {{ getAggregate() }} active connections</h1>
+      <h1 class="title">FLDR targeting {{ config.host }} with {{ getAggregate() }} active connections</h1>
       <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
-      <form class="block" @submit.prevent="updateConfig">
-        <div class="field">
-          <label class="label">Config</label>
-          <div class="control">
-            <input type="text" class="input" v-model="config" />
+      <h2 class="is-size-4 mb-2">Xploit Configuration</h2>
+      <form v-if="!configLoading" class="block" @submit.prevent="updateConfig">
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">Target</label>
+          </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <div class="field has-addons">
+                <p class="control">
+                  <a class="button is-static">Host</a>
+                </p>
+                <div class="control is-expanded">
+                  <input type="text" class="input" v-model="config.host" />
+                </div>
+              </div>
+            </div>
+            <div class="field">
+              <div class="field has-addons">
+                <p class="control">
+                  <a class="button is-static">Port</a>
+                </p>
+                <div class="control">
+                  <input type="text" class="input" v-model.number="config.port" />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="field">
-          <div class="control">
-            <button type="submit" class="button is-primary">OK!</button>
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">HTTP payload</label>
+          </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <div class="field has-addons">
+                <p class="control">
+                  <span class="select">
+                    <select v-model="config.method">
+                      <option>GET</option>
+                      <option>POST</option>
+                    </select>
+                  </span>
+                </p>
+                <div class="control is-expanded">
+                  <input type="text" class="input" v-model="config.path">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">Enable TLS</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" v-model="config.doTLS">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">Enable Slowlorris</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" v-model="config.doSlowpost">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">JSON representation</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <code>{{ JSON.stringify(config) }}</code>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label"></div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <button type="submit" class="button is-primary" :class='{"is-loading": sendingConfig}'>Update</button>
+              </div>
+            </div>
           </div>
         </div>
       </form>
@@ -57,15 +144,18 @@
       el: '#vue-root',
       data: {
         reports: {},
-        config: "{}",
+        configLoading: true,
+        config: {},
+        sendingConfig: false,
         isUp: false,
         lastReport: null,
         speedMbytes: 0,
       },
       methods: {
         updateConfig() {
-          axios.post('/config', JSON.parse(this.config)).then((resp) => {
-            alert("ok!");
+          this.sendingConfig = true;
+          axios.post('/config', this.config).then(() => {
+            this.sendingConfig = false;
           });
         },
         getAggregate() {
@@ -92,9 +182,6 @@
           }
           return Math.round(coll / 1024 / 1024 * 100) / 100;
         },
-        getHost() {
-          return JSON.parse(this.config).host;
-        },
         checkUp() {
           axios.get('/check').then((resp) => {
             this.isUp = resp.data;
@@ -106,7 +193,8 @@
       },
       mounted() {
         axios.get('/config').then((resp) => {
-          this.config = JSON.stringify(resp.data);
+          this.config = resp.data;
+          this.configLoading = false;
         });
         setInterval(() => {
           axios.get('/xhr').then((resp) => {
