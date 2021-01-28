@@ -13,7 +13,7 @@
       <p class="subtitle">Throughput is {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
       <form v-if="!configLoading" v-for="config, srv in configs" class="block" @submit.prevent="updateConfig(srv)">
         <div v-if="Object.hasOwnProperty.call(reports, srv)">
-          <h2 class="is-size-4 mb-2">Config for {{ srv }} - Connected {{ reports[srv].reduce((a, cv) => a+cv.Act) }} / {{ reports[srv].reduce((a, cv) => a+cv.Redials) }}R</h2>
+          <h2 class="is-size-4 mb-2">Config for {{ srv }} - Connected {{ reports[srv].reduce((a, cv) => a + cv.Act, 0) }} / {{ reports[srv].reduce((a, cv) => a + cv.Redials, 0) }}R</h2>
           <div class="field is-horizontal">
             <div class="field-label is-normal">
               <label class="label">Target</label>
