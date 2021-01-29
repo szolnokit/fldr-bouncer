@@ -9,110 +9,132 @@
 <body>
   <section class="section">
     <div id="vue-root" class="container">
-      <h1 class="title">FLDR dashing with {{ getAggregate() }} active connections</h1>
-      <p class="subtitle">Throughput is {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
-      <form v-if="!configLoading" v-for="config, srv in configs" class="block" @submit.prevent="updateConfig(srv)">
-        <div v-if="Object.hasOwnProperty.call(reports, srv)">
-          <h2 class="is-size-4 mb-2">Config for {{ srv }} - Connected {{ reports[srv].reduce((a, cv) => a + cv.Act, 0) }} / {{ reports[srv].reduce((a, cv) => a + cv.Redials, 0) }}R</h2>
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">Target</label>
-            </div>
-            <div class="field-body">
-              <div class="field is-expanded">
-                <div class="field has-addons">
-                  <p class="control">
-                    <a class="button is-static">Host</a>
-                  </p>
-                  <div class="control is-expanded">
-                    <input type="text" class="input" v-model="config.host" />
-                  </div>
-                </div>
-              </div>
-              <div class="field">
-                <div class="field has-addons">
-                  <p class="control">
-                    <a class="button is-static">Port</a>
-                  </p>
-                  <div class="control">
-                    <input type="text" class="input" v-model.number="config.port" />
-                  </div>
-                </div>
-              </div>
-            </div>
+      <h1 class="title">FLDR targeting {{ config.host }} with {{ getAggregate() }} active connections</h1>
+      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
+      <h2 class="is-size-4 mb-2">Xploit Configuration</h2>
+      <form v-if="!configLoading" class="block" @submit.prevent="updateConfig">
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">Target</label>
           </div>
-          <div class="field is-horizontal">
-            <div class="field-label is-normal">
-              <label class="label">HTTP payload</label>
-            </div>
-            <div class="field-body">
-              <div class="field is-expanded">
-                <div class="field has-addons">
-                  <p class="control">
-                    <span class="select">
-                      <select v-model="config.method">
-                        <option>GET</option>
-                        <option>POST</option>
-                      </select>
-                    </span>
-                  </p>
-                  <div class="control is-expanded">
-                    <input type="text" class="input" v-model="config.path">
-                  </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <div class="field has-addons">
+                <p class="control">
+                  <a class="button is-static">Host</a>
+                </p>
+                <div class="control is-expanded">
+                  <input type="text" class="input" v-model="config.host" />
                 </div>
               </div>
             </div>
-          </div>
-          <div class="field is-horizontal">
-            <div class="field-label">
-              <label class="label">Enable TLS</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
+            <div class="field">
+              <div class="field has-addons">
+                <p class="control">
+                  <a class="button is-static">Port</a>
+                </p>
                 <div class="control">
-                  <label class="checkbox">
-                    <input type="checkbox" v-model="config.doTLS">
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="field is-horizontal">
-            <div class="field-label">
-              <label class="label">Enable Slowlorris</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <div class="control">
-                  <label class="checkbox">
-                    <input type="checkbox" v-model="config.doSlowpost">
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="field is-horizontal">
-            <div class="field-label">
-              <label class="label">JSON representation</label>
-            </div>
-            <div class="field-body">
-              <div class="field">
-                <code>{{ JSON.stringify(config) }}</code>
-              </div>
-            </div>
-          </div>
-          <div class="field is-horizontal">
-            <div class="field-label"></div>
-            <div class="field-body">
-              <div class="field">
-                <div class="control">
-                  <button type="submit" class="button is-primary" :class='{"is-loading": sendingConfig}'>Update</button>
+                  <input type="text" class="input" v-model.number="config.port" />
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <div class="field is-horizontal">
+          <div class="field-label is-normal">
+            <label class="label">HTTP payload</label>
+          </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <div class="field has-addons">
+                <p class="control">
+                  <span class="select">
+                    <select v-model="config.method">
+                      <option>GET</option>
+                      <option>POST</option>
+                    </select>
+                  </span>
+                </p>
+                <div class="control is-expanded">
+                  <input type="text" class="input" v-model="config.path">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">Enable TLS</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" v-model="config.doTLS">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">Enable Slowlorris</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <label class="checkbox">
+                  <input type="checkbox" v-model="config.doSlowpost">
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label class="label">JSON representation</label>
+          </div>
+          <div class="field-body">
+            <div class="field">
+              <code>{{ JSON.stringify(config) }}</code>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal">
+          <div class="field-label"></div>
+          <div class="field-body">
+            <div class="field">
+              <div class="control">
+                <button type="submit" class="button is-primary" :class='{"is-loading": sendingConfig}'>Update</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </form>
+      <div class="table-container">
+        <table class="table is-fullwidth is-hoverable">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Status</th>
+              <th>Connections</th>
+              <th>Redials</th>
+              <th>Sent (bytes)</th>
+              <th>Last Error</th>
+            </tr>
+          </thead>
+          <tbody v-for="report, id in reports" :key="id">
+            <tr v-for="subrep, i in report" :key="i">
+              <th :rowspan="report.length" v-if="i == 0">{{ id }}</th>
+              <td>{{ subrep.Status }}</td>
+              <td>{{ subrep.Act }}</td>
+              <td>{{ subrep.Redials }}</td>
+              <td>{{ subrep.Sent }}</td>
+              <td>{{ subrep.LastErr }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
@@ -123,15 +145,16 @@
       data: {
         reports: {},
         configLoading: true,
-        configs: {},
+        config: {},
         sendingConfig: false,
+        isUp: false,
         lastReport: null,
         speedMbytes: 0,
       },
       methods: {
-        updateConfig(id) {
+        updateConfig() {
           this.sendingConfig = true;
-          axios.post(`/configs/${id}`, this.configs[id]).then(() => {
+          axios.post('/config', this.config).then(() => {
             this.sendingConfig = false;
           });
         },
@@ -158,11 +181,19 @@
             }
           }
           return Math.round(coll / 1024 / 1024 * 100) / 100;
+        },
+        checkUp() {
+          axios.get('/check').then((resp) => {
+            this.isUp = resp.data;
+            setTimeout(() => {
+              this.checkUp();
+            }, 2000);
+          });
         }
       },
       mounted() {
-        axios.get('/configs').then((resp) => {
-          this.configs = resp.data;
+        axios.get('/config').then((resp) => {
+          this.config = resp.data;
           this.configLoading = false;
         });
         setInterval(() => {
@@ -175,6 +206,7 @@
             this.lastReport = new Date().getTime();
           });
         }, 1000);
+        this.checkUp();
       }
     });
   </script>
