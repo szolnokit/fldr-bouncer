@@ -21,10 +21,10 @@
             <div class="field is-expanded">
               <div class="field has-addons">
                 <p class="control">
-                  <a class="button is-static">Host</a>
+                  <a class="button is-static">Host/IP</a>
                 </p>
                 <div class="control is-expanded">
-                  <input type="text" class="input" v-model="config.host" />
+                  <input type="text" class="input" v-model="config.IP" />
                 </div>
               </div>
             </div>
@@ -58,6 +58,24 @@
                 <div class="control is-expanded">
                   <input type="text" class="input" v-model="config.path">
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="field is-horizontal" v-for="host, i in config.hosts">
+          <div class="field-label is-normal">
+            <label v-if="i == 0" class="label">Host(s)</label>
+          </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <div class="field has-addons">
+                <div class="control is-expanded">
+                  <input type="text" class="input" v-model="config.hosts[i]">
+                </div>
+                <p class="control">
+                  <a v-if="i == config.hosts.length-1" class="button is-info" @click="() => config.hosts.push('')">Add</a>
+                  <a v-else class="button is-danger" @click="() => config.hosts.splice(i, 1)">Del</a>
+                </p>
               </div>
             </div>
           </div>
