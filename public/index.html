@@ -3,16 +3,28 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FLDR Dashboard</title>
+  <title>weBreak Dashboard</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.1/css/bulma.min.css">
 </head>
 <body>
   <section class="section">
     <div id="vue-root" class="container">
-      <h1 class="title">FLDR targeting {{ config.host }} with {{ getAggregate() }} active connections</h1>
-      <p class="subtitle">Target is <span class="tag" :class='{"is-success": isUp, "is-warning": !isUp}'>{{ isUp ? 'UP' : 'DOWN' }}</span> - {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
+      <h1 class="title">weBreak broker guiding {{ Object.keys(reports).length }} clients with {{ getAggregate() }} active connections</h1>
+      <p class="subtitle">Speeding with {{ speedMbytes }} MB/s (total {{ getSentMbytes() }} MB)</p>
       <h2 class="is-size-4 mb-2">Xploit Configuration</h2>
       <form v-if="!configLoading" class="block" @submit.prevent="updateConfig">
+        <div class="field is-horizontal">
+          <div class="field-label">
+            <label for="enabled_check" class="label">Enabled</label>
+          </div>
+          <div class="field-body">
+            <div class="field is-expanded">
+              <label class="checkbox">
+                <input id="enabled_check" type="checkbox" v-model="config.enabled">
+              </label>
+            </div>
+          </div>
+        </div>
         <div class="field is-horizontal">
           <div class="field-label is-normal">
             <label class="label">Target</label>
@@ -165,7 +177,6 @@
         configLoading: true,
         config: {},
         sendingConfig: false,
-        isUp: false,
         lastReport: null,
         speedMbytes: 0,
       },
@@ -200,14 +211,6 @@
           }
           return Math.round(coll / 1024 / 1024 * 100) / 100;
         },
-        checkUp() {
-          axios.get('/check').then((resp) => {
-            this.isUp = resp.data;
-            setTimeout(() => {
-              this.checkUp();
-            }, 2000);
-          });
-        }
       },
       mounted() {
         axios.get('/config').then((resp) => {
@@ -224,7 +227,6 @@
             this.lastReport = new Date().getTime();
           });
         }, 1000);
-        this.checkUp();
       }
     });
   </script>
